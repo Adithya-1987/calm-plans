@@ -3,6 +3,7 @@ import { CheckSquare, LayoutDashboard, Calendar as CalIcon, Settings, Moon, Sun,
 import { useState } from "react";
 import { useTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
+import { ProfileDropdown } from "@/components/auth/ProfileDropdown";
 
 const NAV = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -79,18 +80,19 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
       {/* Main */}
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="lg:hidden flex items-center justify-between px-4 py-3 border-b border-border bg-background/80 backdrop-blur sticky top-0 z-20">
-          <button
-            onClick={() => setMobileOpen((v) => !v)}
-            className="h-9 w-9 grid place-items-center rounded-lg hover:bg-accent"
-            aria-label="Open menu"
-          >
-            {mobileOpen ? <X className="h-4.5 w-4.5" /> : <Menu className="h-4.5 w-4.5" />}
-          </button>
-          <span className="font-semibold">Lumen</span>
-          <button onClick={toggle} className="h-9 w-9 grid place-items-center rounded-lg hover:bg-accent" aria-label="Toggle theme">
-            {theme === "dark" ? <Sun className="h-4.5 w-4.5" /> : <Moon className="h-4.5 w-4.5" />}
-          </button>
+        <header className="flex items-center justify-between px-4 lg:px-10 py-3 border-b border-border bg-background/80 backdrop-blur sticky top-0 z-20">
+          <div className="flex items-center gap-3 lg:hidden">
+            <button
+              onClick={() => setMobileOpen((v) => !v)}
+              className="h-9 w-9 grid place-items-center rounded-lg hover:bg-accent"
+              aria-label="Open menu"
+            >
+              {mobileOpen ? <X className="h-4.5 w-4.5" /> : <Menu className="h-4.5 w-4.5" />}
+            </button>
+            <span className="font-semibold">Lumen</span>
+          </div>
+          <div className="hidden lg:block" />
+          <ProfileDropdown />
         </header>
 
         <main className="flex-1 overflow-y-auto">
