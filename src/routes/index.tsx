@@ -102,13 +102,6 @@ function Dashboard() {
   );
 }
 
-function greet() {
-  const h = new Date().getHours();
-  if (h < 12) return "morning";
-  if (h < 18) return "afternoon";
-  return "evening";
-}
-
 function StatCard({
   label, value, hint, icon: Icon, progress, tone = "primary",
 }: {
