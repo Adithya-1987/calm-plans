@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTasks } from "@/lib/store";
+import { useAuth } from "@/lib/auth";
 import { isToday, isPast, format } from "date-fns";
 import { Flame, Plus, Sparkles, TrendingUp, ListTodo } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -28,8 +29,25 @@ const QUOTES = [
 
 function Dashboard() {
   const { tasks, streak } = useTasks();
+  const { user, profile } = useAuth();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Task | null>(null);
+
+  // Compute time-of-day greeting on the client only to avoid SSR hydration mismatches
+  // (server timezone may differ from the user's browser).
+  const [greeting, setGreeting] = useState<string | null>(null);
+  useEffect(() => {
+    const h = new Date().getHours();
+    setGreeting(h < 12 ? "morning" : h < 18 ? "afternoon" : "evening");
+  }, []);
+
+  const firstName = (
+    profile?.full_name ||
+    (user?.user_metadata?.full_name as string | undefined) ||
+    (user?.user_metadata?.name as string | undefined) ||
+    user?.email?.split("@")[0] ||
+    ""
+  ).split(" ")[0];
 
   const stats = useMemo(() => {
     const total = tasks.length;
@@ -50,6 +68,12 @@ function Dashboard() {
   const openNew = () => { setEditing(null); setOpen(true); };
   const openEdit = (t: Task) => { setEditing(t); setOpen(true); };
 
+  const headline = stats.percent === 100 && stats.total > 0
+    ? "All done — amazing! 🎉"
+    : greeting
+      ? `Good ${greeting}${firstName ? `, ${firstName}` : ""} — let's get things done.`
+      : `Welcome back${firstName ? `, ${firstName}` : ""} — let's get things done.`;
+
   return (
     <div className="space-y-8">
       {/* Hero */}
@@ -59,7 +83,7 @@ function Dashboard() {
           <div>
             <p className="text-sm/6 opacity-80">{format(new Date(), "EEEE, MMMM d")}</p>
             <h1 className="mt-1 text-3xl lg:text-4xl font-semibold tracking-tight">
-              {stats.percent === 100 && stats.total > 0 ? "All done — amazing! 🎉" : `Good ${greet()}, let's get things done.`}
+              {headline}
             </h1>
             <p className="mt-3 text-sm/6 opacity-90 max-w-xl flex items-center gap-2">
               <Sparkles className="h-4 w-4 shrink-0" />
@@ -100,13 +124,6 @@ function Dashboard() {
       <TaskDialog open={open} onOpenChange={setOpen} editing={editing} />
     </div>
   );
-}
-
-function greet() {
-  const h = new Date().getHours();
-  if (h < 12) return "morning";
-  if (h < 18) return "afternoon";
-  return "evening";
 }
 
 function StatCard({
